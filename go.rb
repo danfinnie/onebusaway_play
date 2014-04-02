@@ -10,7 +10,7 @@ java_import 'org.jruby.util.JRubyFile'
 
 store = GtfsDaoImpl.new
 reader = GtfsReader.new
-reader.input_location = JRubyFile.create(Dir.getwd, "google_transit.zip")
+reader.input_location = JRubyFile.create(Dir.getwd, File.join("gtfs_files", "njt_rail.zip"))
 reader.entity_store = store
 reader.run
 

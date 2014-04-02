@@ -1,2 +1,5 @@
 target
 .jbundler
+
+gtfs_files/*
+!gtfs_files/.gitkeep
