@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.danfinnie.onebusway_play</groupId>
+  <artifactId>playground</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <dependencies>
+    <!-- Core GTFS Library -->
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs</artifactId>
+      <version>1.3.3</version>
+    </dependency>
+    <!-- Optional Hibernate GTFS Database Persistence -->
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-hibernate</artifactId>
+      <version>1.3.3</version>
+    </dependency>
+    <!-- Optional GTFS Transformation Library -->
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-transformer</artifactId>
+      <version>1.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-core</artifactId>
+      <version>1.7.0.RC1</version>
+    </dependency>
+  </dependencies>
+</project>
