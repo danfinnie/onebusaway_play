@@ -10,10 +10,10 @@ java_import 'org.jruby.util.JRubyFile'
 
 store = GtfsDaoImpl.new
 reader = GtfsReader.new
-reader.setInputLocation(JRubyFile.create(Dir.getwd, "google_transit.zip"))
-reader.setEntityStore(store)
+reader.input_location = JRubyFile.create(Dir.getwd, "google_transit.zip")
+reader.entity_store = store
 reader.run
 
-store.getAllRoutes.each do |hi|
-  puts hi.getShortName
+store.all_routes.each do |hi|
+  puts hi.short_name
 end
