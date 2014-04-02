@@ -5,30 +5,15 @@ require 'bundler'
 Bundler.require
 
 java_import 'org.onebusaway.gtfs.serialization.GtfsReader'
+java_import 'org.onebusaway.gtfs.impl.GtfsDaoImpl'
+java_import 'org.jruby.util.JRubyFile'
 
+store = GtfsDaoImpl.new
 reader = GtfsReader.new
-p reader
+reader.setInputLocation(JRubyFile.create(Dir.getwd, "google_transit.zip"))
+reader.setEntityStore(store)
+reader.run
 
-# GtfsReader reader = new GtfsReader();
-# reader.setInputLocation(new File(args[0]));
-
-# /**
-  # * You can register an entity handler that listens for new objects as they
-  # * are read
-  # */
-  # reader.addEntityHandler(new GtfsEntityHandler());
-
-# /**
-  # * Or you can use the internal entity store, which has references to all the
-  # * loaded entities
-  # */
-  # GtfsDaoImpl store = new GtfsDaoImpl();
-# reader.setEntityStore(store);
-
-# reader.run();
-
-# // Access entities through the store
-# for (Route route : store.getAllRoutes()) {
-  # System.out.println("route: " + route.getShortName());
-# }
-# end
+store.getAllRoutes.each do |hi|
+  puts hi.getShortName
+end
