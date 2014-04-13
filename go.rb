@@ -31,10 +31,10 @@ services.each do |service|
   trips = store.get_trips_for_service_id(service)
   trips.each do |trip|
     stop_times = store.get_stop_times_for_trip(trip)
-    stop_times.each do |stop_time|
-      arrival = GregorianCalendar.new(service_date.year, service_date.month, service_date.day, 0, 0, stop_time.arrival_time)
-      puts "At #{date_format.format(arrival.getTime)}, #{trip.trip_headsign} stops at #{stop_time.stop.name}"
+    stop_times.each_cons(2) do |from_stop_time, to_stop_time|
+      from_time = GregorianCalendar.new(service_date.year, service_date.month, service_date.day, 0, 0, from_stop_time.departure_time)
+      to_time = GregorianCalendar.new(service_date.year, service_date.month, service_date.day, 0, 0, to_stop_time.arrival_time)
+      puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}"
     end
   end
-
 end
