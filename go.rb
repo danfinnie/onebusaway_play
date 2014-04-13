@@ -30,21 +30,24 @@ services = calendar_service.get_service_ids_on_date(service_date)
 
 date_format = SimpleDateFormat.new
 
-services.each do |service|
-  trips = store.get_trips_for_service_id(service)
-  trips.each do |trip|
-    stop_times = store.get_stop_times_for_trip(trip)
-    stop_times.each_cons(2) do |from_stop_time, to_stop_time|
-      # Minus ones below are because the service date class adds one to the month...ewww
-      from_time = GregorianCalendar.new(service_date.year, service_date.month - 1, service_date.day, 0, 0, from_stop_time.departure_time)
-      to_time = GregorianCalendar.new(service_date.year, service_date.month - 1, service_date.day, 0, 0, to_stop_time.arrival_time)
-      # The timezone below is wrong.
-      if from_time.compare_to(now) < 0 and to_time.compare_to(now) > 0 
-        percent_complete = (now.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
-        lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
-        lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
-        puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}, it's at [#{lat}, #{lon}]!"
+res = services.map do |service|
+  store.get_trips_for_service_id(service).map do |trip|
+    catch(:found_position) do 
+      store.get_stop_times_for_trip(trip).each_cons(2) do |from_stop_time, to_stop_time|
+        # Minus ones below are because the service date class adds one to the month...ewww
+        from_time = GregorianCalendar.new(service_date.year, service_date.month - 1, service_date.day, 0, 0, from_stop_time.departure_time)
+        to_time = GregorianCalendar.new(service_date.year, service_date.month - 1, service_date.day, 0, 0, to_stop_time.arrival_time)
+        # The timezone below is wrong.
+        if from_time.compare_to(now) < 0 and to_time.compare_to(now) > 0 
+          percent_complete = (now.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
+          lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
+          lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
+          throw :found_position, { trip_id: trip.id.hashCode, trip_name: trip.trip_headsign, lat: lat, lon: lon}
+        end
       end
+      nil
     end
   end
 end
+
+p res.flatten.compact
