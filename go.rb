@@ -41,7 +41,9 @@ services.each do |service|
       # The timezone below is wrong.
       if from_time.compare_to(now) < 0 and to_time.compare_to(now) > 0 
         percent_complete = (now.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
-        puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}, it's #{(percent_complete*100).ceil}% there!"
+        lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
+        lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
+        puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}, it's at [#{lat}, #{lon}]!"
       end
     end
   end
