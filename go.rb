@@ -40,7 +40,8 @@ services.each do |service|
       to_time = GregorianCalendar.new(service_date.year, service_date.month - 1, service_date.day, 0, 0, to_stop_time.arrival_time)
       # The timezone below is wrong.
       if from_time.compare_to(now) < 0 and to_time.compare_to(now) > 0 
-        puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}"
+        percent_complete = (now.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
+        puts "Service #{trip.trip_headsign} leaves #{from_stop_time.stop.name} at #{date_format.format(from_time.getTime)} and arrives at #{to_stop_time.stop.name} at #{date_format.format(to_time.getTime)}, it's #{(percent_complete*100).ceil}% there!"
       end
     end
   end
