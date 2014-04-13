@@ -17,4 +17,5 @@ RUN jbundle install
 ADD . /opt/onebusaway_play
 WORKDIR /opt/onebusaway_play
 
-CMD ./go.rb
+EXPOSE 9292
+CMD rackup
