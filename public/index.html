@@ -16,25 +16,38 @@
           zoom: 8
         };
         var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-        var markers = [];
+        var markers = {};
 
-        refreshTrains = function() {
+        refreshTrains = function(iteration) {
           $.get('/trains', {}, function(data, textStatus, jqXHR) {
-            $.each(markers, function() {
-              this.setMap(null);
+            $.each(data.data, function() {
+              var latLng = new google.maps.LatLng(this.lat, this.lon);
+              if (markers.hasOwnProperty(this.trip_id)) {
+                var marker = markers[this.trip_id];
+                marker.setPosition(latLng);
+                marker.iteration = iteration;
+              } else {
+                var marker = new google.maps.Marker({
+                  position: latLng,
+                  map: map,
+                  title: this.trip_name
+                });
+                marker.iteration = iteration;
+                markers[this.trip_id] = marker;
+              }
             });
-            markers = $.map(data.data, function(trip) {
-              var latLng = new google.maps.LatLng(trip.lat, trip.lon);
-              return new google.maps.Marker({
-                position: latLng,
-                map: map,
-                title: trip.trip_name
-              });
+
+            $.each(markers, function(marker, trip_id) {
+              if (marker.iteration < iteration) {
+                marker.setMap(null);
+                delete markers[trip_id];
+              }
             });
-            refreshTrains();
+
+            refreshTrains(iteration + 1);
           });
         }
-        refreshTrains();
+        refreshTrains(1);
       }
       google.maps.event.addDomListener(window, 'load', initialize);
     </script>
