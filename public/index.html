@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map-canvas { height: 100% }
+    </style>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1OEFwPlSQ7GXvLd_zFms6WNY3vNKX1xY&sensor=false"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript">
+      function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(40.559557, -74.494910),
+          zoom: 8
+        };
+        var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+        $.get('/trains', {}, function(data, textStatus, jqXHR) {
+          $.each(data.data, function() {
+            var latLng = new google.maps.LatLng(this.lat, this.lon);
+            var marker = new google.maps.Marker({
+              position: latLng,
+              map: map,
+              title: this.trip_name
+            });
+          });
+        });
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"/>
+  </body>
+</html>

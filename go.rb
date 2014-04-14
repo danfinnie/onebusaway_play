@@ -53,3 +53,7 @@ get '/trains' do
   
   json data: res.flatten.compact
 end
+
+get '/' do
+  send_file 'public/index.html'
+end
