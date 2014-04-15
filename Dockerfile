@@ -28,4 +28,4 @@ ADD . /opt/onebusaway_play
 WORKDIR /opt/onebusaway_play
 
 EXPOSE 9292
-CMD rackup
+CMD rackup -s mizuno
