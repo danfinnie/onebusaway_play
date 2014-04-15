@@ -25,38 +25,36 @@ factory = CalendarServiceDataFactoryImpl.new(store)
 calendar_service = CalendarServiceImpl.new(factory.createData)
 
 get '/trains' do
-  # start_of_day = GregorianCalendar.new(now.get(Calendar::YEAR), now.get(Calendar::MONTH), now.get(Calendar::DAY_OF_MONTH))
-  service_date = ServiceDate.new
-  services = calendar_service.get_service_ids_on_date(service_date)
+  time = GregorianCalendar.new
+  base_service_date = ServiceDate.new(time)
 
-  date_format = SimpleDateFormat.new
+  res = (-1..1).map do |service_date_offset|
+    service_date = base_service_date.shift(service_date_offset)
+    services = calendar_service.get_service_ids_on_date(service_date)
 
-  res = services.map do |service|
-    agency = store.get_agency_for_id(service.agency_id)
-    timezone = TimeZone.getTimeZone(agency.timezone)
-    now = service_date.getAsCalendar(timezone)
+    services.map do |service|
+      agency = store.get_agency_for_id(service.agency_id)
+      timezone = TimeZone.getTimeZone(agency.timezone)
+      localized_service_date = service_date.getAsCalendar(timezone)
 
-    store.get_trips_for_service_id(service).map do |trip|
-      catch(:found_position) do
-        store.get_stop_times_for_trip(trip).each_cons(2) do |from_stop_time, to_stop_time|
-          from_time = now.clone
-          ServiceDate.moveCalendarToServiceDate(from_time)
-          from_time.add(Calendar::SECOND, from_stop_time.departure_time);
-          from_time.add(Calendar::HOUR, -4) # Bad
+      store.get_trips_for_service_id(service).map do |trip|
+        catch(:found_position) do
+          store.get_stop_times_for_trip(trip).each_cons(2) do |from_stop_time, to_stop_time|
+            from_time = localized_service_date.clone
+            from_time.add(Calendar::SECOND, from_stop_time.departure_time);
 
-          to_time = now.clone
-          ServiceDate.moveCalendarToServiceDate(to_time)
-          to_time.add(Calendar::SECOND, to_stop_time.arrival_time);
-          to_time.add(Calendar::HOUR, -4) # Bad
+            to_time = localized_service_date.clone
+            to_time.add(Calendar::SECOND, to_stop_time.arrival_time);
 
-          if from_time.compare_to(now) < 0 and to_time.compare_to(now) > 0
-            percent_complete = (now.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
-            lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
-            lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
-            throw :found_position, { trip_id: trip.id.hashCode, trip_name: trip.trip_headsign, lat: lat, lon: lon}
+            if from_time.compare_to(time) < 0 and to_time.compare_to(time) > 0
+              percent_complete = (time.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
+              lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
+              lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
+              throw :found_position, { trip_id: trip.id.hashCode, trip_name: trip.trip_headsign, lat: lat, lon: lon}
+            end
           end
+          nil
         end
-        nil
       end
     end
   end
