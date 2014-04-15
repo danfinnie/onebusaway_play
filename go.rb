@@ -16,10 +16,12 @@ java_import 'java.util.TimeZone'
 java_import 'java.text.SimpleDateFormat'
 
 store = GtfsRelationalDaoImpl.new
-reader = GtfsReader.new
-reader.input_location = JRubyFile.create(Dir.getwd, File.join("gtfs_files", "njt_rail.zip"))
-reader.entity_store = store
-reader.run
+["njt_rail", "mta_subway", "mta_lirr", "mta_metronorth"].each do |file|
+  reader = GtfsReader.new
+  reader.input_location = JRubyFile.create(Dir.getwd, File.join("gtfs_files", "#{file}.zip"))
+  reader.entity_store = store
+  reader.run
+end
 
 factory = CalendarServiceDataFactoryImpl.new(store)
 calendar_service = CalendarServiceImpl.new(factory.createData)
