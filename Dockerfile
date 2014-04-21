@@ -10,7 +10,8 @@ RUN cd /tmp ; echo -en '#!/bin/bash\nexit 0\n' > DEBIAN/postinst
 RUN cd /tmp ; dpkg-deb -b . /fuse.deb
 RUN cd /tmp ; dpkg -i /fuse.deb
 
-RUN apt-get install -y git curl openjdk-7-jre build-essential
+RUN apt-get update -y
+RUN apt-get install -y git curl openjdk-7-jre openjdk-7-jdk build-essential
 RUN git clone https://github.com/sstephenson/ruby-build.git /opt/ruby-build
 RUN /opt/ruby-build/bin/ruby-build jruby-1.7.6 /opt/jruby-1.7.6/
 ENV PATH /opt/jruby-1.7.6/bin/:$PATH
@@ -26,6 +27,8 @@ RUN jbundle install
 
 ADD . /opt/onebusaway_play
 WORKDIR /opt/onebusaway_play
+
+RUN ruby compile.rb
 
 EXPOSE 9292
 CMD rackup -s mizuno

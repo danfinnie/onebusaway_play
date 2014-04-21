@@ -4,8 +4,9 @@ require 'rubygems'
 require 'bundler'
 Bundler.require
 
+$CLASSPATH << "/opt/onebusaway_play/classes/"
+
 java_import 'org.onebusaway.gtfs.serialization.GtfsReader'
-java_import 'org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl'
 java_import 'org.onebusaway.gtfs.model.calendar.ServiceDate'
 java_import 'org.onebusaway.gtfs.impl.calendar.CalendarServiceDataFactoryImpl'
 java_import 'org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl'
@@ -15,7 +16,10 @@ java_import 'java.util.Calendar'
 java_import 'java.util.TimeZone'
 java_import 'java.text.SimpleDateFormat'
 
-store = GtfsRelationalDaoImpl.new
+java_import 'com.danfinnie.gtfs.GtfsRelationalMapDbDaoImpl'
+
+store = GtfsRelationalMapDbDaoImpl.new
+
 ["njt_rail", "mta_subway", "mta_lirr", "mta_metronorth"].each do |file|
   reader = GtfsReader.new
   reader.input_location = JRubyFile.create(Dir.getwd, File.join("gtfs_files", "#{file}.zip"))

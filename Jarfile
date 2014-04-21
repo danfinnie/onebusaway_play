@@ -1,3 +1,4 @@
+jar 'org.mapdb:mapdb', '0.9.13'
 jar 'org.slf4j:slf4j-simple', '1.5.6'
 jar 'org.onebusaway:onebusaway-gtfs', '1.3.3'
 jar 'org.onebusaway:onebusaway-gtfs-hibernate', '1.3.3'
