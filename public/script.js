@@ -18,7 +18,11 @@ function initialize() {
           var marker = new google.maps.Marker({
             position: latLng,
             map: map,
-            title: this.trip_name
+            title: this.trip_name,
+            icon: {
+              url: 'train.png',
+              size: new google.maps.Size(40, 37)
+            }
           });
           marker.iteration = iteration;
           markers[this.trip_id] = marker;

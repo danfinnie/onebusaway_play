@@ -72,3 +72,8 @@ get 'script.js' do
   content_type 'application/json'
   send_file 'public/script.js'
 end
+
+get 'train.png' do
+  content_type 'image/png'
+  send_file 'public/train.png'
+end
