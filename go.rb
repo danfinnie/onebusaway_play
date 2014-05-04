@@ -67,3 +67,8 @@ end
 get '/' do
   send_file 'public/index.html'
 end
+
+get 'script.js' do
+  content_type 'application/json'
+  send_file 'public/script.js'
+end
