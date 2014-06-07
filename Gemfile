@@ -6,3 +6,4 @@ gem 'sinatra', require: false
 gem 'sinatra-contrib'
 gem 'pry'
 gem 'sqlite3'
+gem 'ruby-progressbar'

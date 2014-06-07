@@ -1,6 +1,6 @@
 target
 .jbundler
 
-db.db
+db.db*
 gtfs_files/*
 !gtfs_files/.gitkeep
