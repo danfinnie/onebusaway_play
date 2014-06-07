@@ -139,8 +139,13 @@ $db.transaction do
         stmt.execute(*values, dataset_id)
         progress.()
       end
+
+      stmt.close
     end
   end
 end
+
+$db.close
+puts "Done!"
 
 # Add indicies??
