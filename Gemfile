@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-ruby "1.9.3", :engine => "jruby", :engine_version => "1.7.6"
-#ruby=jruby-1.7.6
+ruby "2.1.2"
 
-gem 'jbundler'
-gem 'sinatra', require: ['sinatra', 'sinatra/json']
+gem 'sinatra', require: false
 gem 'sinatra-contrib'
-gem 'mizuno'
+gem 'rubyzip', '>= 1.0.0', require: "zip"
+gem 'pry'
+gem 'sqlite3'
