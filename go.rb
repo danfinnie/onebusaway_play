@@ -13,12 +13,6 @@ def query query
   $db.execute(query).map(&:with_indifferent_access)
 end
 
-class Integer
-  def hours
-    self * 60 * 60
-  end
-end
-
 class DateTime
   def to_i
     self.to_time.to_i
