@@ -1,45 +1,93 @@
 #! /usr/bin/env ruby
 
+require 'date'
+require 'rational'
+
 require 'bundler'
 Bundler.require
 
-get '/trains' do
-  time = GregorianCalendar.new
-  base_service_date = ServiceDate.new(time)
+$db = SQLite3::Database.new "db.db"
 
-  res = (-1..1).map do |service_date_offset|
-    service_date = base_service_date.shift(service_date_offset)
-    services = calendar_service.get_service_ids_on_date(service_date)
+def query query
+  result = $db.execute2 query
+  headers = result.shift
+  result.map { |row| Arrayfields.new(headers.zip(row)) }
+end
 
-    services.map do |service|
-      agency = store.get_agency_for_id(service.agency_id)
-      timezone = TimeZone.getTimeZone(agency.timezone)
-      localized_service_date = service_date.getAsCalendar(timezone)
+class Integer
+  def hours
+    self * 60 * 60
+  end
+end
 
-      store.get_trips_for_service_id(service).map do |trip|
-        catch(:found_position) do
-          store.get_stop_times_for_trip(trip).each_cons(2) do |from_stop_time, to_stop_time|
-            from_time = localized_service_date.clone
-            from_time.add(Calendar::SECOND, from_stop_time.departure_time);
+def calculate_gtfs_time(base, offset_str)
+  offset_int = offset_str.split(':').inject(0) { |memo, section| memo * 60 + section.to_i }
+  Time.new(base.year, base.month, base.day, 12, 0, 0) - 12.hours + offset_int
+end
 
-            to_time = localized_service_date.clone
-            to_time.add(Calendar::SECOND, to_stop_time.arrival_time);
+# get '/trains' do
+  time = DateTime.now
+  weekday = time.strftime("%A").downcase
 
-            if from_time.compare_to(time) < 0 and to_time.compare_to(time) > 0
-              percent_complete = (time.getTimeInMillis - from_time.getTimeInMillis).to_f / (to_time.getTimeInMillis - from_time.getTimeInMillis)
-              lat = from_stop_time.stop.lat + (to_stop_time.stop.lat - from_stop_time.stop.lat) * percent_complete
-              lon = from_stop_time.stop.lon + (to_stop_time.stop.lon - from_stop_time.stop.lon) * percent_complete
-              throw :found_position, { trip_id: trip.id.hashCode, trip_name: trip.trip_headsign, lat: lat, lon: lon}
-            end
-          end
-          nil
-        end
-      end
-    end
+  results = query <<-"EOT"
+    SELECT
+      from_time.departure_time,
+      to_time.arrival_time,
+      trip.trip_headsign,
+      trip.trip_id,
+      from_stop.stop_lat as from_lat,
+      from_stop.stop_lon as from_lon,
+      to_stop.stop_lat as to_lat,
+      to_stop.stop_lon as to_lon,
+      calendar.start_date,
+      calendar.end_date
+    FROM stop_times from_time
+    JOIN stop_times to_time
+    JOIN trips trip
+    JOIN calendar calendar
+    JOIN stops from_stop
+    JOIN stops to_stop
+    WHERE from_time.dataset_id = to_time.dataset_id
+    AND trip.trip_id = from_time.trip_id
+    AND trip.dataset_id = from_time.dataset_id
+    AND calendar.service_id = trip.service_id
+    AND calendar.dataset_id = from_time.dataset_id
+    AND from_stop.dataset_id = from_time.dataset_id
+    AND to_stop.dataset_id = from_time.dataset_id
+    AND from_stop.stop_id = from_time.stop_id
+    AND to_stop.stop_id = to_time.stop_id
+    AND from_time.trip_id = to_time.trip_id
+    AND from_time.stop_id + 1 = to_time.stop_id
+    AND calendar.#{weekday} = 1
+    ;
+  EOT
+
+  data = results.select do |result|
+    service_start_date = DateTime.strptime(result[:start_date], "%Y%m%d")
+    service_end_date = DateTime.strptime(result[:end_date], "%Y%m%d").next_day
+    is_in_date_range = service_start_date < time && time < service_end_date
+
+    arrival_time = calculate_gtfs_time(time, result[:arrival_time])
+    departure_time = calculate_gtfs_time(time, result[:departure_time])
+    is_in_flight = time < arrival_time && time > departure_time
+
+    is_in_date_range && is_in_flight
+  end.map do |result|
+    arrival_time = calculate_gtfs_time(time, result[:arrival_time])
+    departure_time = calculate_gtfs_time(time, result[:departure_time])
+    percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - depature_time.to_i)
+    from_lat, to_lat, from_lon, to_lon = result.values_at(:from_lat, :to_lat, :from_lon, :to_lon)
+    lat = from_lat + (to_lat - from_lat) * percent_complete
+    lon = from_lon + (to_lon - from_lon) * percent_complete
+    trip_id, trip_headsign = result.values_at(:trip_id, :trip_headsign)
+    { trip_id: trip_id, trip_name: trip_headsign, lat: lat, lon: lon }
   end
 
-  json data: res.flatten.compact
-end
+  ap data
+  # json data: res.flatten.compact
+# end
+
+__END__
 
 get '/' do
   send_file 'public/index.html'

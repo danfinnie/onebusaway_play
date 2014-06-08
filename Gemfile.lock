@@ -1,6 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    arrayfields (4.9.2)
+    awesome_print (1.2.0)
     backports (3.6.0)
     coderay (1.1.0)
     ffi (1.9.3-java)
@@ -43,6 +45,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  arrayfields
+  awesome_print
   pry
   ruby-progressbar
   sinatra
