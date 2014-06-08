@@ -8,8 +8,10 @@ gem 'pry'
 gem 'sqlite3'
 gem 'ruby-progressbar'
 gem 'awesome_print'
-gem 'activesupport', require: [
+gem 'activesupport', '~> 4.1.1', require: [
   'active_support',
   'active_support/core_ext/hash/indifferent_access',
-  'active_support/core_ext/numeric/time'
+  'active_support/core_ext/numeric/time',
+  'active_support/core_ext/date',
+  'active_support/core_ext/date_time'
 ]

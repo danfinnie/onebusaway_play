@@ -13,16 +13,10 @@ def query query
   $db.execute(query).map(&:with_indifferent_access)
 end
 
-class DateTime
-  def to_i
-    self.to_time.to_i
-  end
-end
-
 def calculate_gtfs_time(base, offset_str)
   offset_int = offset_str.split(':').inject(0) { |memo, section| memo * 60 + section.to_i }
-  time = Time.new(base.year, base.month, base.day, 12, 0, 0) - 12.hours + offset_int
-  time.to_datetime
+  gtfs_base_time = base.at_noon - 12.hours
+  gtfs_base_time.advance(seconds: offset_int) # Cannot just use #+ because that would advance the DateTime object above by days, not seconds.
 end
 
 # Get weekly services that coincide with the time.
