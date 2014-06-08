@@ -20,16 +20,23 @@ class Integer
   end
 end
 
-def calculate_gtfs_time(base, offset_str)
-  offset_int = offset_str.split(':').inject(0) { |memo, section| memo * 60 + section.to_i }
-  Time.new(base.year, base.month, base.day, 12, 0, 0) - 12.hours + offset_int
+class DateTime
+  def to_i
+    self.to_time.to_i
+  end
 end
 
-# get '/trains' do
-  time = DateTime.now
+def calculate_gtfs_time(base, offset_str)
+  offset_int = offset_str.split(':').inject(0) { |memo, section| memo * 60 + section.to_i }
+  time = Time.new(base.year, base.month, base.day, 12, 0, 0) - 12.hours + offset_int
+  time.to_datetime
+end
+
+# Get weekly services that coincide with the time.
+def get_calendar_results time
   weekday = time.strftime("%A").downcase
 
-  results = query <<-"EOT"
+  calendar_results = query <<-"EOT"
     SELECT
       from_time.departure_time,
       to_time.arrival_time,
@@ -62,20 +69,62 @@ end
     ;
   EOT
 
-  data = results.select do |result|
+  calendar_results.select do |result|
     service_start_date = DateTime.strptime(result[:start_date], "%Y%m%d")
     service_end_date = DateTime.strptime(result[:end_date], "%Y%m%d").next_day
     is_in_date_range = service_start_date < time && time < service_end_date
+  end
+end
 
+# Get extra services for a day
+def get_calendar_inclusions time
+  calendar_results = query <<-"EOT"
+    SELECT
+      from_time.departure_time,
+      to_time.arrival_time,
+      trip.trip_headsign,
+      trip.trip_id,
+      from_stop.stop_lat as from_lat,
+      from_stop.stop_lon as from_lon,
+      to_stop.stop_lat as to_lat,
+      to_stop.stop_lon as to_lon
+    FROM stop_times from_time
+    JOIN stop_times to_time
+    JOIN trips trip
+    JOIN stops from_stop
+    JOIN stops to_stop
+    JOIN calendar_dates calendar_date
+    WHERE from_time.dataset_id = to_time.dataset_id
+    AND trip.trip_id = from_time.trip_id
+    AND trip.dataset_id = from_time.dataset_id
+    AND from_stop.dataset_id = from_time.dataset_id
+    AND to_stop.dataset_id = from_time.dataset_id
+    AND from_stop.stop_id = from_time.stop_id
+    AND to_stop.stop_id = to_time.stop_id
+    AND from_time.trip_id = to_time.trip_id
+    AND from_time.stop_id + 1 = to_time.stop_id
+    AND calendar_date.dataset_id = from_time.dataset_id
+    AND calendar_date.service_id = trip.service_id
+    AND calendar_date.exception_type = 1 -- service added constant
+    AND calendar_date.date = "#{time.strftime('%Y%m%d')}"
+    ;
+  EOT
+end
+
+# get '/trains' do
+  time = DateTime.now
+  data = get_calendar_inclusions(time) # + get_calendar_results
+
+  ap data
+
+  data = data.select do |result|
     arrival_time = calculate_gtfs_time(time, result[:arrival_time])
     departure_time = calculate_gtfs_time(time, result[:departure_time])
-    is_in_flight = time < arrival_time && time > departure_time
-
-    is_in_date_range && is_in_flight
+    time < arrival_time && time > departure_time
   end.map do |result|
     arrival_time = calculate_gtfs_time(time, result[:arrival_time])
     departure_time = calculate_gtfs_time(time, result[:departure_time])
-    percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - depature_time.to_i)
+    percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - departure_time.to_i)
     from_lat, to_lat, from_lon, to_lon = result.values_at(:from_lat, :to_lat, :from_lon, :to_lon)
     lat = from_lat + (to_lat - from_lat) * percent_complete
     lon = from_lon + (to_lon - from_lon) * percent_complete
