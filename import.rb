@@ -35,7 +35,7 @@ class DirectoryImporter
         progress_function = -> { @progress_reporter.((imported_size + f.tell).to_f / total_size) }
         yield f, @log, progress_function
       end
-      return imported_size + file_size
+      imported_size + file_size
     end
   end
 end
@@ -78,7 +78,7 @@ class ZipDirectoryImporter
           progress_reporter: -> (new_value) { file.fraction_complete = new_value },
           log: -> (*args) { self.log(*args) }
         )
-        yield directory_importer
+        yield directory_importer, file.path
       end
     end
     @progress_bar.finish
@@ -112,13 +112,14 @@ end
 
 # Bulk load all data
 $db.transaction do
-  ZipDirectoryImporter.new("gtfs_files").each_with_index do |directory_importer, dataset_id|
+  ZipDirectoryImporter.new("gtfs_files").each_with_index do |metadata, dataset_id|
+    directory_importer, dataset_name = metadata
     directory_importer.each do |f, logger, progress|
       csv_options = { headers: true }
       table_name = f.path[/.*\/(.*)\./, 1]
 
       # Don't judge... MTA's Manhattan bus file has malformed data.
-      if table_name == "trips" && zip_file_name =~ /manhattan.*bus/
+      if table_name == "trips" && dataset_name =~ /manhattan.*bus/
         csv_options[:quote_char] = "\x00"
       end
 

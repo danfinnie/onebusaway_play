@@ -59,6 +59,7 @@ CREATE TABLE stops
   stop_url  text,
   location_type  integer ,
   parent_station  text,
+  wheelchair_accessible int,
   PRIMARY KEY (dataset_id, stop_id)
 );
 
