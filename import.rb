@@ -9,8 +9,6 @@ def csv_join(array, sep='')
   "(" + sep + array.join(sep + ', ' + sep) + sep + ")"
 end
 
-$i = 0
-
 # Generate schema
 $db = SQLite3::Database.new "db.db"
 $db.execute_batch(File.read('schema.sql'))
@@ -63,8 +61,8 @@ class ZipDirectoryImporter
 
   include Enumerable
 
-  def initialize(dir)
-    @files = Dir["gtfs_files/*.zip"].map { |x| Zip.new(x, self) }
+  def initialize(files)
+    @files = files.map { |x| Zip.new(x, self) }
     @i = 0
   end
 
@@ -112,7 +110,7 @@ end
 
 # Bulk load all data
 $db.transaction do
-  ZipDirectoryImporter.new("gtfs_files").each_with_index do |metadata, dataset_id|
+  ZipDirectoryImporter.new(ARGV).each_with_index do |metadata, dataset_id|
     directory_importer, dataset_name = metadata
     directory_importer.each do |f, logger, progress|
       csv_options = { headers: true }
