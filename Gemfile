@@ -8,4 +8,4 @@ gem 'pry'
 gem 'sqlite3'
 gem 'ruby-progressbar'
 gem 'awesome_print'
-gem 'arrayfields'
+gem 'activesupport', require: ['active_support', 'active_support/core_ext/hash/indifferent_access']

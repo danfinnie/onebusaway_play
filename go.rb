@@ -7,11 +7,10 @@ require 'bundler'
 Bundler.require
 
 $db = SQLite3::Database.new "db.db"
+$db.results_as_hash = true
 
 def query query
-  result = $db.execute2 query
-  headers = result.shift
-  result.map { |row| Arrayfields.new(headers.zip(row)) }
+  $db.execute(query).map(&:with_indifferent_access)
 end
 
 class Integer
