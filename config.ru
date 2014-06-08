@@ -4,4 +4,4 @@ Bundler.require
 
 require File.expand_path '../go.rb', __FILE__
 
-run Sinatra::Application
+run GtfsServer

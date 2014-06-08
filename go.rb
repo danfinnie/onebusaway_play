@@ -72,13 +72,13 @@ def get_calendar_results time
   calendar_results.select do |result|
     service_start_date = DateTime.strptime(result[:start_date], "%Y%m%d")
     service_end_date = DateTime.strptime(result[:end_date], "%Y%m%d").next_day
-    is_in_date_range = service_start_date < time && time < service_end_date
+    service_start_date < time && time < service_end_date
   end
 end
 
 # Get extra services for a day
 def get_calendar_inclusions time
-  calendar_results = query <<-"EOT"
+  query <<-"EOT"
     SELECT
       from_time.departure_time,
       to_time.arrival_time,
@@ -111,43 +111,40 @@ def get_calendar_inclusions time
   EOT
 end
 
-# get '/trains' do
-  time = DateTime.now
-  data = get_calendar_inclusions(time) # + get_calendar_results
+class GtfsServer < Sinatra::Base
+  get '/trains' do
+    time = DateTime.now
+    data = get_calendar_inclusions(time) # + get_calendar_results(time)
 
-  ap data
+    data = data.select do |result|
+      arrival_time = calculate_gtfs_time(time, result[:arrival_time])
+      departure_time = calculate_gtfs_time(time, result[:departure_time])
+      time < arrival_time && time > departure_time
+    end.map do |result|
+      arrival_time = calculate_gtfs_time(time, result[:arrival_time])
+      departure_time = calculate_gtfs_time(time, result[:departure_time])
+      percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - departure_time.to_i)
+      from_lat, to_lat, from_lon, to_lon = result.values_at(:from_lat, :to_lat, :from_lon, :to_lon)
+      lat = from_lat + (to_lat - from_lat) * percent_complete
+      lon = from_lon + (to_lon - from_lon) * percent_complete
+      trip_id, trip_headsign = result.values_at(:trip_id, :trip_headsign)
+      { trip_id: trip_id, trip_name: trip_headsign, lat: lat, lon: lon }
+    end
 
-  data = data.select do |result|
-    arrival_time = calculate_gtfs_time(time, result[:arrival_time])
-    departure_time = calculate_gtfs_time(time, result[:departure_time])
-    time < arrival_time && time > departure_time
-  end.map do |result|
-    arrival_time = calculate_gtfs_time(time, result[:arrival_time])
-    departure_time = calculate_gtfs_time(time, result[:departure_time])
-    percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - departure_time.to_i)
-    from_lat, to_lat, from_lon, to_lon = result.values_at(:from_lat, :to_lat, :from_lon, :to_lon)
-    lat = from_lat + (to_lat - from_lat) * percent_complete
-    lon = from_lon + (to_lon - from_lon) * percent_complete
-    trip_id, trip_headsign = result.values_at(:trip_id, :trip_headsign)
-    { trip_id: trip_id, trip_name: trip_headsign, lat: lat, lon: lon }
+    json data: data
   end
 
-  ap data
-  # json data: res.flatten.compact
-# end
+  get '/' do
+    send_file 'public/index.html'
+  end
 
-__END__
+  get 'script.js' do
+    content_type 'application/json'
+    send_file 'public/script.js'
+  end
 
-get '/' do
-  send_file 'public/index.html'
-end
-
-get 'script.js' do
-  content_type 'application/json'
-  send_file 'public/script.js'
-end
-
-get 'train.png' do
-  content_type 'image/png'
-  send_file 'public/train.png'
+  get 'train.png' do
+    content_type 'image/png'
+    send_file 'public/train.png'
+  end
 end
