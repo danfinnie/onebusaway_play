@@ -6,9 +6,12 @@ module Importer
       "(" + sep + array.join(sep + ', ' + sep) + sep + ")"
     end
 
+    def initialize db
+      @db = db
+    end
+
     def import!
       # Generate schema
-      @db = SQLite3::Database.new "db.db"
       @db.execute_batch(File.read('schema.sql'))
       @db.synchronous = :off
       # @db.journal_mode = :memory

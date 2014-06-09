@@ -1,10 +1,14 @@
 module Server
-  class Gtfs < Sinatra::Base
-    get '/trains' do
-      time = DateTime.now
+  class RealTimeFinder
+    def initialize(db)
+      @db = db
+      @db.results_as_hash = true
+    end
+
+    def find(time)
       data = get_calendar_inclusions(time) # + get_calendar_results(time)
 
-      data = data.select do |result|
+      data.select do |result|
         arrival_time = calculate_gtfs_time(time, result[:arrival_time])
         departure_time = calculate_gtfs_time(time, result[:departure_time])
         time < arrival_time && time > departure_time
@@ -18,28 +22,6 @@ module Server
         trip_id, trip_headsign = result.values_at(:trip_id, :trip_headsign)
         { trip_id: trip_id, trip_name: trip_headsign, lat: lat, lon: lon }
       end
-
-      json data: data
-    end
-
-    get '/' do
-      send_file 'public/index.html'
-    end
-
-    get '/script.js' do
-      content_type 'application/javascript'
-      send_file 'public/script.js'
-    end
-
-    get '/train.png' do
-      content_type 'image/png'
-      send_file 'public/train.png'
-    end
-
-    def initialize
-      @db = SQLite3::Database.new "db.db"
-      @db.results_as_hash = true
-      super
     end
 
     private

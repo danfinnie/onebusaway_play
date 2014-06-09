@@ -3,6 +3,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.require
 
-require File.expand_path '../lib/server/gtfs_server.rb', __FILE__
+require_relative 'lib/server/real_time_finder'
+require_relative 'lib/server/server'
 
-run Server::Gtfs
+run Server::Server
