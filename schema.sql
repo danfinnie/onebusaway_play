@@ -144,7 +144,8 @@ CREATE TABLE stop_times
   stop_headsign  text,
   pickup_type  integer ,
   drop_off_type  integer ,
-  shape_dist_traveled  double precision
+  shape_dist_traveled  double precision,
+  drop_off_time
 );
 
 

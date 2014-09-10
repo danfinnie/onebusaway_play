@@ -2,6 +2,8 @@ require 'csv'
 
 module Importer
   class Importer
+    IGNORED_TABLES = %w[fare_attributes fare_rules]
+
     def csv_join(array, sep='')
       "(" + sep + array.join(sep + ', ' + sep) + sep + ")"
     end
@@ -10,7 +12,7 @@ module Importer
       @db = db
     end
 
-    def import!
+    def import!(files)
       # Generate schema
       @db.execute_batch(File.read('schema.sql'))
       @db.synchronous = :off
@@ -18,7 +20,7 @@ module Importer
 
       # Bulk load all data
       @db.transaction do
-        ZipDirectoryImporter.new(ARGV).each_with_index do |metadata, dataset_id|
+        ZipDirectoryImporter.new(files).each_with_index do |metadata, dataset_id|
           directory_importer, dataset_name = metadata
           directory_importer.each do |f, logger, progress|
             csv_options = { headers: true }
@@ -27,6 +29,10 @@ module Importer
             # Don't judge... MTA's Manhattan bus file has malformed data.
             if table_name == "trips" && dataset_name =~ /manhattan.*bus/
               csv_options[:quote_char] = "\x00"
+            end
+
+            if IGNORED_TABLES.include? table_name
+              next
             end
 
             csv = CSV.new(f, csv_options)
