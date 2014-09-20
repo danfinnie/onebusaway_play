@@ -8,4 +8,4 @@ require_relative 'lib/importer/zip_directory_importer'
 require_relative 'lib/importer/importer'
 
 db = SQLite3::Database.new "db.db"
-Importer::Importer.new(db).import!
+Importer::Importer.new(db, ARGV).import!

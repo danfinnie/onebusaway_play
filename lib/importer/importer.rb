@@ -6,9 +6,13 @@ module Importer
       "(" + sep + array.join(sep + ', ' + sep) + sep + ")"
     end
 
-    def initialize db
+    def initialize db, files
       @db = db
+      @files = files
     end
+
+    attr_reader :files
+    private :files
 
     def import!
       # Generate schema
@@ -18,7 +22,7 @@ module Importer
 
       # Bulk load all data
       @db.transaction do
-        ZipDirectoryImporter.new(ARGV).each_with_index do |metadata, dataset_id|
+        ZipDirectoryImporter.new(files).each_with_index do |metadata, dataset_id|
           directory_importer, dataset_name = metadata
           directory_importer.each do |f, logger, progress|
             csv_options = { headers: true }
