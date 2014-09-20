@@ -18,7 +18,7 @@ def sh cmd
 end
 
 module NJTransit
-  include Capybara::DSL
+  extend Capybara::DSL
   visit "https://www.njtransit.com/developers"
   fill_in "userName", with: ENV['NJTRANSIT_USERNAME']
   fill_in "password", with: ENV['NJTRANSIT_PASSWORD']
