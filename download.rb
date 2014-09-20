@@ -54,3 +54,7 @@ module MTA
     download_url url
   end
 end
+
+module PATH
+  download_url 'http://trilliumtransit.com/transit_feeds/path-nj-us/gtfs.zip'
+end
