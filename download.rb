@@ -2,6 +2,7 @@
 
 require 'uri'
 require 'bundler'
+require 'cgi'
 Bundler.require(:download, :development)
 Dotenv.load
 
@@ -12,9 +13,13 @@ end
 Capybara.run_server = false
 Capybara.current_driver = :poltergeist
 
-def sh cmd
+def download_url(url, curl_opts="")
+  url = url.to_s
+  file_system_escaped_url = CGI::escape(url)
+  cmd = %Q{curl -o #{file_system_escaped_url} #{curl_opts} "#{url}"}
   puts cmd
-  `#{cmd}`
+  pid = Process.spawn(cmd, chdir: './gtfs_files')
+  Process.wait(pid)
 end
 
 module NJTransit
@@ -30,17 +35,22 @@ module NJTransit
     link = find_link(link_text)
     relative_url = link['href']
     absolute_url = URI::join(current_url, relative_url)
-    sh %Q{curl -k -b JSESSIONID=#{cookie_value} -o "./gtfs_files/njt_#{type.downcase}.zip" "#{absolute_url}"`}
+    download_url absolute_url, "-k -b JSESSIONID=#{cookie_value}"
   end
 end
 
 module MTA
   %w[
-    http://web.mta.info/developers/data/nyct/bus/google_transit_{bronx,brooklyn,manhattan,queens,staten_island}.zip
+    http://web.mta.info/developers/data/nyct/bus/google_transit_bronx.zip
+    http://web.mta.info/developers/data/nyct/bus/google_transit_brooklyn.zip
+    http://web.mta.info/developers/data/nyct/bus/google_transit_manhattan.zip
+    http://web.mta.info/developers/data/nyct/bus/google_transit_queens.zip
+    http://web.mta.info/developers/data/nyct/bus/google_transit_staten_island.zip
     http://web.mta.info/developers/data/nyct/subway/google_transit.zip
-    http://web.mta.info/developers/data/{lirr,mnr,busco}/google_transit.zip
-  ].each do |curl_url|
-    pid = Process.spawn(%Q{curl -O  "#{curl_url}"}, chdir: './gtfs_files')
-    Process.wait(pid)
+    http://web.mta.info/developers/data/lirr/google_transit.zip
+    http://web.mta.info/developers/data/mnr/google_transit.zip
+    http://web.mta.info/developers/data/busco/google_transit.zip
+  ].each do |url|
+    download_url url
   end
 end
