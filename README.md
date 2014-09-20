@@ -18,4 +18,4 @@ download them.  For the automatic scripts:
 
 1. Copy `.env.example` to `.env`.
 2. Sign up for an NJTransit developers account and put the credentials in `.env`.
-3. Run `./download.rb` to download a bunch of current GTFS data.
+3. Run `./download.rb` to download GTFS data from NJTransit and the MTA (New York's public transit).
