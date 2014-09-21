@@ -18,6 +18,7 @@ CREATE TABLE feed_info
   feed_end_date text,
   feed_version text,
   feed_timezone text, -- Specified by LIRR but not part of the spec
+  feed_license text,
   PRIMARY KEY (dataset_id)
 );
 
@@ -41,6 +42,7 @@ CREATE TABLE agency
   agency_timezone  text ,
   agency_lang  text,
   agency_phone  text,
+  agency_fare_url text,
   PRIMARY KEY (dataset_id, agency_id)
 );
 
@@ -60,6 +62,7 @@ CREATE TABLE stops
   location_type  integer ,
   parent_station  text,
   wheelchair_accessible int,
+  stop_timezone text,
   PRIMARY KEY (dataset_id, stop_id)
 );
 
@@ -96,6 +99,7 @@ CREATE TABLE calendar
   sunday  integer,
   start_date text,
   end_date text,
+  service_name text,
   PRIMARY KEY (dataset_id, service_id)
 );
 
@@ -128,6 +132,7 @@ CREATE TABLE trips
   wheelchair_accessible integer,
   wheelchair_boarding integer, -- not part of spec but metronorth provides this
   bikes_allowed integer,
+  trip_bikes_allowed integer,
   PRIMARY KEY (dataset_id, trip_id)
 );
 
@@ -147,7 +152,6 @@ CREATE TABLE stop_times
   shape_dist_traveled  double precision
 );
 
-
 DROP TABLE IF EXISTS frequencies;
 
 CREATE TABLE frequencies
@@ -156,5 +160,33 @@ CREATE TABLE frequencies
   trip_id  text,
   start_time  text,
   end_time  text,
-  headway_secs  integer 
+  exact_times text,
+  headway_secs  integer
+);
+
+DROP TABLE IF EXISTS fare_attributes;
+
+CREATE TABLE fare_attributes
+(
+  dataset_id integer,
+  agency_id text,
+  fare_id text,
+  price text,
+  currency_type text,
+  payment_method text,
+  transfers text,
+  transfer_duration text
+);
+
+DROP TABLE IF EXISTS fare_rules;
+
+CREATE TABLE fare_rules
+(
+  dataset_id integer,
+  agency_id text,
+  route_id text,
+  fare_id text,
+  origin_id text,
+  destination_id text,
+  contains_id text
 );
