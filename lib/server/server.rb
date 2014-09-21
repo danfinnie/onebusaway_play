@@ -1,5 +1,8 @@
 module Server
   class Server < Sinatra::Base
+    LOG =  'logs/download_import.txt'
+    Process.spawn("./download.rb; ./import.rb", out: :err, err: LOG)
+
     get '/trains' do
       # json data: []
       json data: finder.find(DateTime.now)
@@ -17,6 +20,11 @@ module Server
     get '/train.png' do
       content_type 'image/png'
       send_file 'public/train.png'
+    end
+
+    get '/status' do
+      content_type 'text/plain'
+      send_file LOG
     end
 
     private
