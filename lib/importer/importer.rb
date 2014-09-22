@@ -42,7 +42,7 @@ module Importer
             value_placeholder = csv_join(Array.new(columns.size, "?"))
             stmt = @db.prepare("insert into #{table_name} #{quoted_columns} values #{value_placeholder}")
 
-            logger.(:always, "Extracting #{table_name} from #{directory_importer.path}")
+            logger.(:always, "Extracting #{table_name} from #{dataset_name} #{directory_importer.path}")
 
             csv.each do |csv_row|
               values = csv_row.to_a.transpose[1]
