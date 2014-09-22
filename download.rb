@@ -7,7 +7,11 @@ Bundler.require(:download, :development)
 Dotenv.load
 
 Capybara.register_driver :poltergeist do |app|
-  Capybara::Poltergeist::Driver.new(app, :phantomjs_options => ['--ignore-ssl-errors=yes', '--local-to-remote-url-access=yes'])
+  Capybara::Poltergeist::Driver.new(
+    app,
+    phantomjs: File.absolute_path('./lib/downloader/phantomjs'),
+    phantomjs_options: ['--ignore-ssl-errors=yes', '--local-to-remote-url-access=yes']
+  )
 end
 
 Capybara.run_server = false
