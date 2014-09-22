@@ -29,7 +29,7 @@ module Importer
             table_name = f.path[/.*\/(.*)\./, 1]
 
             # Don't judge... MTA's Manhattan bus file has malformed data.
-            if table_name == "trips" && dataset_name =~ /manhattan.*bus/
+            if table_name == "trips" && dataset_name =~ /bus.*manhattan/
               csv_options[:quote_char] = "\x00"
             end
 
