@@ -1,7 +1,7 @@
 module Server
   class Server < Sinatra::Base
     LOG =  'logs/download_import.txt'
-    Process.spawn("./download.rb; ./import.rb", out: :err, err: LOG)
+    Process.spawn("./download.rb; ./import.rb gtfs_files/*lirr*", out: :err, err: LOG)
 
     get '/trains' do
       # json data: []

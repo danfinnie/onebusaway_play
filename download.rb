@@ -26,22 +26,22 @@ def download_url(url, curl_opts="")
   Process.wait(pid)
 end
 
-module NJTransit
-  extend Capybara::DSL
-  visit "https://www.njtransit.com/developers"
-  fill_in "userName", with: ENV['NJTRANSIT_USERNAME']
-  fill_in "password", with: ENV['NJTRANSIT_PASSWORD']
-  click_on "Login"
-  cookie_value = page.driver.cookies['JSESSIONID'].value
+# module NJTransit
+  # extend Capybara::DSL
+  # visit "https://www.njtransit.com/developers"
+  # fill_in "userName", with: ENV['NJTRANSIT_USERNAME']
+  # fill_in "password", with: ENV['NJTRANSIT_PASSWORD']
+  # click_on "Login"
+  # cookie_value = page.driver.cookies['JSESSIONID'].value
 
-  ["Rail", "Bus"].each do |type|
-    link_text = type + " Data"
-    link = find_link(link_text)
-    relative_url = link['href']
-    absolute_url = URI::join(current_url, relative_url)
-    download_url absolute_url, "-k -b JSESSIONID=#{cookie_value}"
-  end
-end
+  # ["Rail", "Bus"].each do |type|
+    # link_text = type + " Data"
+    # link = find_link(link_text)
+    # relative_url = link['href']
+    # absolute_url = URI::join(current_url, relative_url)
+    # download_url absolute_url, "-k -b JSESSIONID=#{cookie_value}"
+  # end
+# end
 
 module MTA
   %w[
@@ -54,7 +54,7 @@ module MTA
     http://web.mta.info/developers/data/lirr/google_transit.zip
     http://web.mta.info/developers/data/mnr/google_transit.zip
     http://web.mta.info/developers/data/busco/google_transit.zip
-  ].each do |url|
+  ].grep(/lirr/).each do |url|
     download_url url
   end
 end
