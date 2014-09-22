@@ -1,0 +1,7 @@
+---
+applications:
+- name: gtfs
+  host: gtfs
+  memory: 2G
+  command: 'rackup -p $VCAP_APP_PORT'
+  buildpack: 'https://github.com/cloudfoundry/buildpack-ruby.git'

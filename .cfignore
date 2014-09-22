@@ -1,0 +1,9 @@
+target
+.jbundler
+.env
+
+db.db*
+gtfs_files/*
+!gtfs_files/.gitkeep
+logs/*
+!logs/.gitkeep
