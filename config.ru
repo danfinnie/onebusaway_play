@@ -11,17 +11,22 @@ require_relative 'lib/importer/directory_importer'
 require_relative 'lib/importer/zip_directory_importer'
 require_relative 'lib/importer/importer'
 
-worker_number = ENV['WORKER_NUMBER'].to_i
-s3 = AWS::S3.new(access_key_id: ENV['AWS_ACCESS_KEY'], secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'])
-bucket = s3.buckets['gtfs-files']
-s3object = bucket.objects.sort_by(&:key)[worker_number]
+db = SQLite3::Database.new ":memory:"
 
-File.open('gtfs_files/s3.zip', 'wb') do |file|
-  s3object.read do |chunk|
-    file.write(chunk)
+Thread.start do
+  # sqlite3 must be compiled with threadsafe=1 for this to work without a mutex.  Mine was.
+  worker_number = ENV['WORKER_NUMBER'].to_i
+  s3 = AWS::S3.new(access_key_id: ENV['AWS_ACCESS_KEY'], secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'])
+  bucket = s3.buckets['gtfs-files']
+  s3object = bucket.objects.sort_by(&:key)[worker_number]
+
+  File.open('gtfs_files/s3.zip', 'wb') do |file|
+    s3object.read do |chunk|
+      file.write(chunk)
+    end
   end
+
+  Importer::Importer.new(db, ['gtfs_files/s3.zip']).import!
 end
 
-db = SQLite3::Database.new ":memory:"
-Importer::Importer.new(db, ['gtfs_files/s3.zip']).import!
 run Server::Server.new(db)
