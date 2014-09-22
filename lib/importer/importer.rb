@@ -56,10 +56,7 @@ module Importer
         end
       end
 
-      @db.close
-      puts "Done!"
-
-      # Add indicies??
+      puts "Done importing!"
     end
   end
 end

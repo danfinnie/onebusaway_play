@@ -1,7 +1,12 @@
 module Server
   class Server < Sinatra::Base
-    LOG =  'logs/download_import.txt'
-    Process.spawn("./download.rb; ./import.rb gtfs_files/*lirr*", out: :err, err: LOG)
+    def initialize(db)
+      super()
+      @db = db
+    end
+
+    attr_reader :db
+    private :db
 
     get '/trains' do
       # json data: []
@@ -31,10 +36,6 @@ module Server
 
     def finder
       @finder ||= RealTimeFinder.new(db)
-    end
-
-    def db
-      @db ||= SQLite3::Database.new "db.db"
     end
   end
 end

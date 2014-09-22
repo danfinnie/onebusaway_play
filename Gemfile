@@ -7,6 +7,8 @@ gem 'sinatra-contrib'
 gem 'sqlite3'
 gem 'ruby-progressbar'
 gem 'awesome_print'
+gem 'aws-sdk'
+gem 'dotenv'
 gem 'activesupport', '~> 4.1.1', require: [
   'active_support',
   'active_support/core_ext/hash/indifferent_access',

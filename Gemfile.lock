@@ -9,6 +9,11 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.3.6)
     awesome_print (1.2.0)
+    aws-sdk (1.53.0)
+      aws-sdk-v1 (= 1.53.0)
+    aws-sdk-v1 (1.53.0)
+      json (~> 1.4)
+      nokogiri (>= 1.4.4)
     backports (3.6.0)
     capybara (2.2.1)
       mime-types (>= 1.16)
@@ -90,6 +95,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 4.1.1)
   awesome_print
+  aws-sdk
   capybara
   dotenv
   launchy
