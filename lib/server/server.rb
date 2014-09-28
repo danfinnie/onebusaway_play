@@ -9,7 +9,7 @@ module Server
     private :db
 
     get '/trains' do
-      # json data: []
+      headers "Access-Control-Allow-Origin" => "*"
       json data: finder.find(DateTime.now)
     end
 
@@ -19,7 +19,7 @@ module Server
 
     get '/script.js' do
       content_type 'application/javascript'
-      send_file 'public/script.js'
+      erb :'script.js', locals: { num_workers: ENV['NUM_WORKERS'].to_i }
     end
 
     get '/train.png' do
