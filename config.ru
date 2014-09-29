@@ -13,6 +13,7 @@ require_relative 'lib/importer/importer'
 
 db = SQLite3::Database.new ":memory:"
 
+Thread.abort_on_exception = true
 Thread.start do
   # sqlite3 must be compiled with threadsafe=1 for this to work without a mutex.  Mine was.
   worker_number = ENV['WORKER_NUMBER'].to_i

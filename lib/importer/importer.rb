@@ -33,6 +33,10 @@ module Importer
               csv_options[:quote_char] = "\x00"
             end
 
+            if table_name =~ /fare/
+              next
+            end
+
             csv = CSV.new(f, csv_options)
             csv.gets
             columns = csv.headers + ["dataset_id"]
@@ -56,7 +60,7 @@ module Importer
         end
       end
 
-      puts "Done importing!"
+        $stderr.puts "Done importing!"
     end
   end
 end

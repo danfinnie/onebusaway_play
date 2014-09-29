@@ -3,7 +3,7 @@
 require 'uri'
 require 'bundler'
 require 'cgi'
-Bundler.require(:download, :development)
+Bundler.require(:default, :download, :development)
 Dotenv.load
 
 Capybara.register_driver :poltergeist do |app|

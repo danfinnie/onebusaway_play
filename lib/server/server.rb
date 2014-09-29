@@ -32,6 +32,11 @@ module Server
       send_file LOG
     end
 
+    get '/sqlite' do
+      content_type 'text/plain'
+      db.query('pragma compile_options;').to_a.inspect
+    end
+
     private
 
     def finder

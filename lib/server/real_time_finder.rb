@@ -106,7 +106,7 @@ module Server
         AND from_stop.stop_id = from_time.stop_id
         AND to_stop.stop_id = to_time.stop_id
         AND from_time.trip_id = to_time.trip_id
-        AND from_time.stop_id + 1 = to_time.stop_id
+        AND from_time.stop_sequence + 1 = to_time.stop_sequence
         AND calendar_date.dataset_id = from_time.dataset_id
         AND calendar_date.service_id = trip.service_id
         AND calendar_date.exception_type = 1 -- service added constant
