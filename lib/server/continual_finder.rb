@@ -6,7 +6,7 @@ module Server
       @semaphore = Mutex.new
       @latest = nil
 
-      Thread.start do
+      processor = Thread.start do
         real_time_finder = RealTimeFinder.new(db)
         loop do
           begin
@@ -24,6 +24,7 @@ module Server
           end
         end
       end
+      processor.priority = -10
     end
 
     def latest
