@@ -21,7 +21,7 @@ module Importer
       # @db.journal_mode = :memory
 
       # Bulk load all data
-      @db.transaction do
+      # @db.transaction do
         ZipDirectoryImporter.new(files).each_with_index do |metadata, dataset_id|
           directory_importer, dataset_name = metadata
           directory_importer.each do |f, logger, progress|
@@ -36,6 +36,7 @@ module Importer
             if table_name =~ /fare/
               next
             end
+
 
             csv = CSV.new(f, csv_options)
             csv.gets
@@ -58,7 +59,7 @@ module Importer
             stmt.close
           end
         end
-      end
+      # end
 
         $stderr.puts "Done importing!"
     end
