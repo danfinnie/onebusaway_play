@@ -6,7 +6,7 @@ module Server
     end
 
     def find(time)
-      data = get_calendar_inclusions(time) # + get_calendar_results(time)
+      data = get_calendar_inclusions(time) + get_calendar_results(time)
       Thread.pass
 
       data.select do |result|
@@ -41,6 +41,7 @@ module Server
 
     # Get weekly services that coincide with the time.
     def get_calendar_results time
+      Thread.pass
       weekday = time.strftime("%A").downcase
 
       calendar_results = query <<-"EOT"
@@ -77,6 +78,7 @@ module Server
       EOT
 
       calendar_results.select do |result|
+        Thread.pass
         service_start_date = DateTime.strptime(result[:start_date], "%Y%m%d")
         service_end_date = DateTime.strptime(result[:end_date], "%Y%m%d").next_day
         service_start_date < time && time < service_end_date
@@ -85,6 +87,7 @@ module Server
 
     # Get extra services for a day
     def get_calendar_inclusions time
+      Thread.pass
       query <<-"EOT"
         SELECT
           from_time.departure_time,
