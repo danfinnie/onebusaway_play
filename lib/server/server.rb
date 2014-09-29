@@ -2,15 +2,15 @@ module Server
   class Server < Sinatra::Base
     def initialize(db)
       super()
-      @db = db
+      @continual_finder = ContinualFinder.new(db)
     end
 
-    attr_reader :db
-    private :db
+    attr_reader :continual_finder
+    private :continual_finder
 
     get '/trains' do
       headers "Access-Control-Allow-Origin" => "*"
-      json data: finder.find(DateTime.now)
+      json data: continual_finder.latest
     end
 
     get '/' do
@@ -30,17 +30,6 @@ module Server
     get '/status' do
       content_type 'text/plain'
       send_file LOG
-    end
-
-    get '/sqlite' do
-      content_type 'text/plain'
-      db.query('pragma compile_options;').to_a.inspect
-    end
-
-    private
-
-    def finder
-      @finder ||= RealTimeFinder.new(db)
     end
   end
 end

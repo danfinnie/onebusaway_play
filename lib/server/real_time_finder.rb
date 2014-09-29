@@ -7,12 +7,15 @@ module Server
 
     def find(time)
       data = get_calendar_inclusions(time) # + get_calendar_results(time)
+      Thread.pass
 
       data.select do |result|
+        Thread.pass
         arrival_time = calculate_gtfs_time(time, result[:arrival_time])
         departure_time = calculate_gtfs_time(time, result[:departure_time])
         time < arrival_time && time > departure_time
       end.map do |result|
+        Thread.pass
         arrival_time = calculate_gtfs_time(time, result[:arrival_time])
         departure_time = calculate_gtfs_time(time, result[:departure_time])
         percent_complete = (time.to_i - departure_time.to_i).to_f / (arrival_time.to_i - departure_time.to_i)

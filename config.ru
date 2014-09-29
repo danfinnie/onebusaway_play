@@ -5,6 +5,7 @@ Bundler.require(:development, :importer, :default)
 Dotenv.load
 
 require_relative 'lib/server/real_time_finder'
+require_relative 'lib/server/continual_finder'
 require_relative 'lib/server/server'
 
 require_relative 'lib/importer/directory_importer'
